@@ -1,5 +1,5 @@
 # app.py
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
@@ -62,3 +62,4 @@ iface = gr.Interface(
     description="Chat with a local LLM using LangChain, FAISS, and HuggingFace."
 )
 iface.launch()
+
