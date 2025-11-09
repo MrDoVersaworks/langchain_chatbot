@@ -1,5 +1,10 @@
-langchain
-transformers
-sentence-transformers
+langchain==1.0.5
+langchain-core==1.0.4
+langchain-community==1.0.5
+langchain-text-splitters
+langchain-openai
 faiss-cpu
 gradio
+fastapi
+uvicorn
+python-dotenv
