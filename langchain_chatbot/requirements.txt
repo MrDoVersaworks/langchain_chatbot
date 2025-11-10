@@ -10,3 +10,4 @@ uvicorn
 python-dotenv
 transformers
 torch
+sentence-transformers
