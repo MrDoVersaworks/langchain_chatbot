@@ -2,7 +2,6 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_experimental.chains import RetrievalQA
 from langchain.chains import RetrievalQA
 from transformers import pipeline
 import gradio as gr
@@ -62,6 +61,7 @@ iface = gr.Interface(
     description="Chat with a local LLM using LangChain, FAISS, and HuggingFace."
 )
 iface.launch()
+
 
 
 
