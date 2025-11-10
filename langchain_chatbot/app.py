@@ -6,7 +6,10 @@ from transformers import pipeline
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain.chains.retrieval_qa.base import RetrievalQA
+try:
+    from langchain.chains import RetrievalQA
+except ImportError:
+    from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain.llms import HuggingFacePipeline
 
 # ----------------------------
@@ -68,5 +71,9 @@ iface = gr.Interface(
     description="Chat with a local LLM using LangChain, FAISS, and HuggingFace."
 )
 
-iface.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 8080)))
+iface.launch(
+    server_name="0.0.0.0",
+    server_port=int(os.environ.get("PORT", 8080))
+)
+
 
