@@ -6,7 +6,7 @@ from transformers import pipeline
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_community.chains.retrieval_qa.base import RetrievalQA
+from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain.llms import HuggingFacePipeline
 
 # ----------------------------
@@ -69,3 +69,4 @@ iface = gr.Interface(
 )
 
 iface.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 8080)))
+
