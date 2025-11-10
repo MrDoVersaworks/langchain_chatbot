@@ -6,10 +6,7 @@ from transformers import pipeline
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-try:
-    from langchain.chains import RetrievalQA
-except ImportError:
-    from langchain.chains.retrieval_qa.base import RetrievalQA
+from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain.llms import HuggingFacePipeline
 
 # ----------------------------
@@ -61,8 +58,11 @@ def chatbot(query):
     return result["result"]
 
 # ----------------------------
-# STEP 6: Launch Gradio Interface
+# STEP 6: Launch Gradio Interface (Render-compatible)
 # ----------------------------
+port = int(os.environ.get("PORT", 8080))
+print(f"Binding Gradio server to 0.0.0.0:{port}…")  # Debug info
+
 iface = gr.Interface(
     fn=chatbot,
     inputs="text",
@@ -73,7 +73,8 @@ iface = gr.Interface(
 
 iface.launch(
     server_name="0.0.0.0",
-    server_port=int(os.environ.get("PORT", 8080))
+    server_port=port,
+    share=False,  # Do not use Gradio's public link
+    debug=True,
+    prevent_thread_lock=True  # Needed for Render
 )
-
-
