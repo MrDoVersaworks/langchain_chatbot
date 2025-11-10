@@ -1,3 +1,4 @@
+# app.py
 import os
 import gradio as gr
 from transformers import pipeline
@@ -8,6 +9,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain.llms import HuggingFacePipeline
+from fastapi import FastAPI
+from fastapi.middleware.wsgi import WSGIMiddleware
 
 # ----------------------------
 # STEP 1: Load and Chunk Your Data
@@ -58,11 +61,8 @@ def chatbot(query):
     return result["result"]
 
 # ----------------------------
-# STEP 6: Launch Gradio Interface (Render-compatible)
+# STEP 6: Launch Gradio Interface
 # ----------------------------
-port = int(os.environ.get("PORT", 8080))
-print(f"Binding Gradio server to 0.0.0.0:{port}…")  # Debug info
-
 iface = gr.Interface(
     fn=chatbot,
     inputs="text",
@@ -71,10 +71,20 @@ iface = gr.Interface(
     description="Chat with a local LLM using LangChain, FAISS, and HuggingFace."
 )
 
-iface.launch(
-    server_name="0.0.0.0",
-    server_port=port,
-    share=False,  # Do not use Gradio's public link
-    debug=True,
-    prevent_thread_lock=True  # Needed for Render
-)
+# Wrap Gradio app inside FastAPI for Render port detection
+app = FastAPI()
+app.mount("/", WSGIMiddleware(iface.app))
+
+# ----------------------------
+# STEP 7: Run Gradio for local development or Render
+# ----------------------------
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))  # Render sets this automatically
+    print(f"Binding Gradio server to 0.0.0.0:{port}…")  # Debug info
+    iface.launch(
+        server_name="0.0.0.0",
+        server_port=port,
+        share=False,
+        debug=True,
+        prevent_thread_lock=True
+    )
