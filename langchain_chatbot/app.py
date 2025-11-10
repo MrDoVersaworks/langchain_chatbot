@@ -7,7 +7,7 @@ from transformers import pipeline
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain.chains.retrieval_qa.base import RetrievalQA
+from langchain.chains import RetrievalQA
 from langchain.llms import HuggingFacePipeline
 from fastapi import FastAPI
 from fastapi.middleware.wsgi import WSGIMiddleware
@@ -88,3 +88,4 @@ if __name__ == "__main__":
         debug=True,
         prevent_thread_lock=True
     )
+
