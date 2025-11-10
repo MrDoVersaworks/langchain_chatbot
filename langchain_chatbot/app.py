@@ -1,12 +1,51 @@
-# app.py
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.chains.question_answering import RetrievalQA
-from langchain.llms import HuggingFacePipeline  # <-- missing in your code
-from transformers import pipeline
-import gradio as gr
+import importlib
 import os
+import gradio as gr
+
+# ----------------------------
+# STEP 0: Dynamic LangChain Imports
+# ----------------------------
+def dynamic_import(module_paths, class_name):
+    """
+    Try multiple module paths for a class, return the first one that exists.
+    """
+    for path in module_paths:
+        try:
+            module = importlib.import_module(path)
+            return getattr(module, class_name)
+        except (ModuleNotFoundError, AttributeError):
+            continue
+    raise ImportError(f"Could not find {class_name} in any of {module_paths}")
+
+# RecursiveCharacterTextSplitter
+RecursiveCharacterTextSplitter = dynamic_import(
+    ["langchain.text_splitter", "langchain_text_splitters"],
+    "RecursiveCharacterTextSplitter"
+)
+
+# RetrievalQA
+RetrievalQA = dynamic_import(
+    ["langchain.chains", "langchain.chains.question_answering", "langchain.chains.qa"],
+    "RetrievalQA"
+)
+
+# HuggingFacePipeline
+HuggingFacePipeline = dynamic_import(
+    ["langchain.llms", "langchain.llms.huggingface_pipeline"],
+    "HuggingFacePipeline"
+)
+
+# FAISS vectorstore
+FAISS = dynamic_import(
+    ["langchain.vectorstores", "langchain_community.vectorstores"],
+    "FAISS"
+)
+
+# HuggingFaceEmbeddings
+HuggingFaceEmbeddings = dynamic_import(
+    ["langchain.embeddings", "langchain_community.embeddings"],
+    "HuggingFaceEmbeddings"
+)
 
 # ----------------------------
 # STEP 1: Load and Chunk Your Data
@@ -14,7 +53,6 @@ import os
 with open("data/sample.txt", "r", encoding="utf-8") as f:
     text = f.read()
 
-# Split text into chunks
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=500,
     chunk_overlap=50,
@@ -31,6 +69,7 @@ vector_store = FAISS.from_texts(chunks, embeddings)
 # ----------------------------
 # STEP 3: Initialize Local LLM
 # ----------------------------
+from transformers import pipeline
 llm_pipeline = pipeline("text-generation", model="gpt2", max_length=256, temperature=0.7)
 llm = HuggingFacePipeline(pipeline=llm_pipeline)
 
@@ -48,11 +87,10 @@ qa_chain = RetrievalQA.from_chain_type(
 # ----------------------------
 def chatbot(query):
     result = qa_chain({"query": query})
-    answer = result["result"]
-    return answer
+    return result["result"]
 
 # ----------------------------
-# STEP 6: Launch Gradio Interface
+# STEP 6: Launch Gradio Interface (Render-compatible)
 # ----------------------------
 iface = gr.Interface(
     fn=chatbot,
@@ -61,15 +99,4 @@ iface = gr.Interface(
     title="LangChain Local Chatbot",
     description="Chat with a local LLM using LangChain, FAISS, and HuggingFace."
 )
-iface.launch()
-
-
-
-
-
-
-
-
-
-
-
+iface.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 8080)))
