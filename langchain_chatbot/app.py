@@ -24,6 +24,12 @@ def health_check():
         "error": str(loading_error) if loading_error else None
     }
 
+@app.get("/test")
+def test_endpoint():
+    """Simple test endpoint to verify server is responding"""
+    print("🧪 TEST ENDPOINT CALLED")
+    return {"message": "Server is responding!", "timestamp": time.time()}
+
 # ----------------------------
 # Lazy Model Loading (on first request)
 # ----------------------------
@@ -161,6 +167,13 @@ Answer: """
 def chatbot(query):
     """Handle chatbot queries - loads models on first request"""
     global is_ready, rag_chain
+    
+    # LOG EVERY REQUEST
+    print(f"\n{'='*60}")
+    print(f"🔵 CHATBOT FUNCTION CALLED")
+    print(f"📥 Query received: '{query}'")
+    print(f"📊 Status - Ready: {is_ready}, Loading: {loading_lock}, Error: {loading_error is not None}")
+    print(f"{'='*60}")
     
     # Load models on first request (lazy loading)
     if not is_ready and not loading_lock and not loading_error:
