@@ -4,6 +4,9 @@ langchain-core==1.0.4
 langchain-community==0.4.1
 langchain-text-splitters==1.0.0
 
+# Required for output parsing
+langchain-core>=1.0.0
+
 # Vector store
 faiss-cpu==1.12.0
 
