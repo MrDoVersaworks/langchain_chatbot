@@ -2,22 +2,20 @@
 import os
 import gradio as gr
 from transformers import pipeline
-
 # --- LangChain imports (2025+ structure) ---
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-from langchain.llms import HuggingFacePipeline
+from langchain.chains.retrieval_qa.base import RetrievalQA  # FIXED: Full import path
+from langchain_community.llms import HuggingFacePipeline  # FIXED: Moved to community
 from fastapi import FastAPI
-from fastapi.middleware.wsgi import WSGIMiddleware
+import uvicorn
 
 # ----------------------------
 # STEP 1: Load and Chunk Your Data
 # ----------------------------
 os.makedirs("data", exist_ok=True)
 sample_path = "data/sample.txt"
-
 if not os.path.exists(sample_path):
     with open(sample_path, "w", encoding="utf-8") as f:
         f.write("This is a sample document for your LangChain chatbot.")
@@ -61,7 +59,7 @@ def chatbot(query):
     return result["result"]
 
 # ----------------------------
-# STEP 6: Launch Gradio Interface
+# STEP 6: Create Gradio Interface
 # ----------------------------
 iface = gr.Interface(
     fn=chatbot,
@@ -71,21 +69,22 @@ iface = gr.Interface(
     description="Chat with a local LLM using LangChain, FAISS, and HuggingFace."
 )
 
-# Wrap Gradio app inside FastAPI for Render port detection
+# ----------------------------
+# STEP 7: FastAPI wrapper for Render
+# ----------------------------
 app = FastAPI()
-app.mount("/", WSGIMiddleware(iface.app))
+
+@app.get("/")
+def read_root():
+    return {"status": "Chatbot is running"}
+
+# Mount Gradio
+app = gr.mount_gradio_app(app, iface, path="/")
 
 # ----------------------------
-# STEP 7: Run Gradio for local development or Render
+# STEP 8: Run with Uvicorn
 # ----------------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))  # Render sets this automatically
-    print(f"Binding Gradio server to 0.0.0.0:{port}…")  # Debug info
-    iface.launch(
-        server_name="0.0.0.0",
-        server_port=port,
-        share=False,
-        debug=True,
-        prevent_thread_lock=True
-    )
-
+    port = int(os.environ.get("PORT", 8080))
+    print(f"Starting server on 0.0.0.0:{port}")
+    uvicorn.run(app, host="0.0.0.0", port=port)
