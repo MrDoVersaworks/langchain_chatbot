@@ -1,13 +1,22 @@
-langchain
-langchain-core
-langchain-community
-langchain-text-splitters
-langchain-openai
-faiss-cpu
-gradio
-fastapi
-uvicorn
-python-dotenv
-transformers
-torch
-sentence-transformers
+# Core LangChain - pinned to avoid breaking changes
+langchain==1.0.5
+langchain-core==1.0.4
+langchain-community==0.4.1
+langchain-text-splitters==1.0.0
+
+# Vector store
+faiss-cpu==1.12.0
+
+# Web interface
+gradio==5.49.1
+fastapi==0.121.1
+uvicorn[standard]==0.38.0
+
+# ML models - use CPU-only torch to save space
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.9.0+cpu
+transformers==4.57.1
+sentence-transformers==5.1.2
+
+# Utilities
+python-dotenv==1.2.1
